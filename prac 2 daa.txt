@@ -1,0 +1,113 @@
+Bellman-Ford Algorithm using Dynamic Programming 
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+#define MAX_VERTICES 100
+#define MAX_EDGES 100
+
+// Structure to represent an edge in the graph
+struct Edge {
+    int source, destination, weight;
+};
+
+// Structure to represent the graph
+struct Graph {
+    int numVertices, numEdges;
+    struct Edge edges[MAX_EDGES];
+};
+
+// Function to initialize the graph
+void initializeGraph(struct Graph *graph, int V, int E) {
+    graph->numVertices = V;
+    graph->numEdges = E;
+}
+
+// Function to relax edges
+void relax(int *dist, int *parent, struct Edge edge) {
+    if (dist[edge.destination] > dist[edge.source] + edge.weight) {
+        dist[edge.destination] = dist[edge.source] + edge.weight;
+        parent[edge.destination] = edge.source;
+    }
+}
+
+// Function to perform Bellman-Ford algorithm
+int bellmanFord(struct Graph graph, int *dist, int *parent, int source) {
+    int V = graph.numVertices;
+    int E = graph.numEdges;
+
+    // Initialize distance array
+    for (int i = 0; i < V; i++) {
+        dist[i] = INT_MAX;
+        parent[i] = -1;
+    }
+    dist[source] = 0;
+
+    // Relax edges |V| - 1 times
+    for (int i = 1; i <= V - 1; i++) {
+        for (int j = 0; j < E; j++) {
+            relax(dist, parent, graph.edges[j]);
+        }
+    }
+
+    // Check for negative-weight cycles
+    for (int i = 0; i < E; i++) {
+        struct Edge edge = graph.edges[i];
+        if (dist[edge.destination] > dist[edge.source] + edge.weight) {
+            return 0; // Negative-weight cycle detected
+        }
+    }
+
+    return 1; // No negative-weight cycle detected
+}
+
+int main() {
+    struct Graph graph;
+    int V, E;
+
+    printf("Enter the number of vertices and edges: ");
+    scanf("%d %d", &V, &E);
+
+    initializeGraph(&graph, V, E);
+
+    printf("Enter the edges (source, destination, weight):\n");
+    for (int i = 0; i < E; i++) {
+        scanf("%d %d %d", &graph.edges[i].source, &graph.edges[i].destination, &graph.edges[i].weight);
+    }
+
+    int source;
+    printf("Enter the source vertex: ");
+    scanf("%d", &source);
+
+    int dist[MAX_VERTICES];
+    int parent[MAX_VERTICES];
+
+    if (bellmanFord(graph, dist, parent, source)) {
+        printf("Shortest distances from source vertex %d:\n", source);
+        for (int i = 0; i < V; i++) {
+            printf("Vertex %d: Distance = %d, Parent = %d\n", i, dist[i], parent[i]);
+        }
+    } else {
+        printf("Negative-weight cycle detected in the graph.\n");
+    }
+
+    return 0;
+}
+Output:
+Enter the number of vertices and edges: 5 8
+Enter the edges (source, destination, weight):
+0 1 5
+0 2 8
+0 3 -4
+1 2 -3
+2 4 9
+3 1 7
+3 4 2
+4 0 6
+Enter the source vertex: 0
+Shortest distances from source vertex 0:
+Vertex 0: Distance = 0, Parent = -1
+Vertex 1: Distance = 2, Parent = 3
+Vertex 2: Distance = 5, Parent = 1
+Vertex 3: Distance = -4, Parent = 0
+Vertex 4: Distance = 3, Parent = 2

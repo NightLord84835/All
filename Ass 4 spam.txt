@@ -1,0 +1,99 @@
+import numpy as np
+import pandas as pd
+!pip install nltk
+import nltk
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+df = pd.read_csv(' ',sep='\t',names=['label','text'])
+
+df
+
+df.shape
+
+nltk.download('stopwords')
+
+sent = 'How are you friends?'
+
+from nltk.tokenize import word_tokenize
+word_tokenize(sent)
+
+from nltk.corpus import stopwords
+swords = stopwords.words('english')
+
+clean = [word for word in word_tokenize(sent) if word not in swords]
+
+clean
+
+from nltk.stem import PorterStemmer
+ps = PorterStemmer()
+clean = [ps.stem(word) for word in word_tokenize(sent) 
+         if word not in swords]
+clean
+
+
+
+sent = 'Hello friends! How are you? We will learning python today'
+
+
+def clean_text(sent):
+    tokens = word_tokenize(sent)
+    clean = [word for word in tokens if word.isdigit() or word.isalpha()]
+    clean = [ps.stem(word) for word in clean
+         if word not in swords]
+    return clean
+
+
+clean_text(sent)
+
+tfidf = TfidfVectorizer(analyzer=clean_text)
+
+x = df['text']
+y = df['label']
+
+
+x_new = tfidf.fit_transform(x)
+
+x.shape
+
+x_new.shape
+
+import seaborn as sns
+sns.countplot(x=y)
+
+
+from sklearn.model_selection import train_test_split
+x_train,x_test,y_train,y_test = train_test_split(x_new,y,test_size=0.25,random_state=1)
+
+
+print(f"Size of splitted data")
+print(f"x_train {x_train.shape}")
+print(f"y_train {y_train.shape}")
+print(f"y_test {x_test.shape}")
+print(f"y_test {y_test.shape}")
+
+
+from sklearn.naive_bayes import GaussianNB
+
+
+nb = GaussianNB()
+nb.fit(x_train.toarray(),y_train)
+y_pred_nb = nb.predict(x_test.toarray())
+
+
+y_test.value_counts()
+
+from sklearn.metrics import ConfusionMatrixDisplay, accuracy_score
+from sklearn.metrics import classification_report
+import matplotlib.pyplot as plt
+
+
+ConfusionMatrixDisplay.from_predictions(y_test,y_pred_nb)
+plt.title('Naive bayes')
+plt.show()
+print(f" Accuracy is {accuracy_score(y_test,y_pred_nb)}")
+print(classification_report(y_test,y_pred_nb))
+
+
+
+
+

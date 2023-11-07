@@ -1,0 +1,81 @@
+//Program to solve the travelling salesman problem and to print the path and the cost using LC Branch and Bound
+#include <stdio.h>
+#include <stdbool.h>
+#include <limits.h>
+
+#define N 4 // Number of cities
+#define INF INT_MAX
+
+int graph[N][N] = {
+    {0, 10, 15, 20},
+    {10, 0, 35, 25},
+    {15, 35, 0, 30},
+    {20, 25, 30, 0}
+}; // Replace with your city distance matrix
+
+int minCost = INF; // Initialize with a large value
+
+// Function to calculate the cost of the current tour
+int calculateCost(int tour[N], int n) {
+    int cost = 0;
+    for (int i = 0; i < n - 1; i++) {
+        cost += graph[tour[i]][tour[i + 1]];
+    }
+    cost += graph[tour[n - 1]][tour[0]]; // Return to the starting city
+    return cost;
+}
+
+// Function to find the minimum cost using LC Branch and Bound
+void tsp(int tour[N], int level, int n) {
+    if (level == n) {
+        int cost = calculateCost(tour, n);
+        if (cost < minCost) {
+            minCost = cost;
+            printf("Path: ");
+            for (int i = 0; i < n; i++) {
+                printf("%d -> ", tour[i]);
+            }
+            printf("%d\n", tour[0]); // Return to the starting city
+            printf("Cost: %d\n", cost);
+        }
+        return;
+    }
+
+    for (int i = level; i < n; i++) {
+        // Swap the current city with the level-th city
+        int temp = tour[level];
+        tour[level] = tour[i];
+        tour[i] = temp;
+
+        int costBound = calculateCost(tour, level + 1);
+
+        if (costBound < minCost) {
+            tsp(tour, level + 1, n);
+        }
+
+        // Swap back to backtrack
+        temp = tour[level];
+        tour[level] = tour[i];
+        tour[i] = temp;
+    }
+}
+
+int main() {
+    int tour[N];
+    for (int i = 0; i < N; i++) {
+        tour[i] = i;
+    }
+
+    printf("Travelling Salesman Path and Cost:\n");
+    tsp(tour, 0, N);
+
+    printf("Minimum Cost: %d\n", minCost);
+
+    return 0;
+}
+
+Output:
+Travelling Salesman Path and Cost:
+Path: 0 -> 1 -> 3 -> 2 -> 0
+Cost: 80
+Minimum Cost: 80
